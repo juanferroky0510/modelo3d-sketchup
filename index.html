@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Three.js VR</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./assets/css/style.css">
+
+    <!-- IMPORTMAP -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.179.1/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.179.1/examples/jsm/"
+        }
+    }
+    </script>
+
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-dark bg-dark navbar-expand-lg">
+        <div class="container">
+
+            <a class="navbar-brand fw-bold" href="#">
+                Visor VR
+            </a>
+
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero d-flex justify-content-center align-items-center text-center text-white">
+        <div>
+            <h1 class="display-4 fw-bold">
+                Modelo 3D en VR
+            </h1>
+
+            <p class="lead">
+                Three.js + WebXR
+            </p>
+        </div>
+    </section>
+
+    <!-- ESCENA -->
+    <div id="container3D"></div>
+
+    <!-- FOOTER -->
+    <footer class="bg-dark text-white text-center py-4">
+
+        <h5>Proyecto VR</h5>
+
+        <p>
+            Programador: Juan Fer
+        </p>
+
+    </footer>
+
+    <!-- Bootstrap -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- APP -->
+    <script type="module" src="./assets/js/app.js"></script>
+
+</body>
+</html>
