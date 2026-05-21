@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 
 import { GLTFLoader }
-from 'three/addons/loaders/GLTFLoader.js';
+    from 'three/addons/loaders/GLTFLoader.js';
 
 import { StereoEffect }
-from 'three/addons/effects/StereoEffect.js';
+    from 'three/addons/effects/StereoEffect.js';
 
 
 // ======================
@@ -32,6 +32,32 @@ const camera =
 
 camera.position.set(0, 1.7, 5);
 
+// ======================
+// ROTACION TELEFONO
+// ======================
+
+let deviceAlpha = 0;
+let deviceBeta = 0;
+let deviceGamma = 0;
+
+
+// LEER GIROSCOPIO
+window.addEventListener(
+    'deviceorientation',
+    (event) => {
+
+        deviceAlpha =
+            event.alpha || 0;
+
+        deviceBeta =
+            event.beta || 0;
+
+        deviceGamma =
+            event.gamma || 0;
+
+    }
+);
+
 
 // ======================
 // RENDERER
@@ -39,7 +65,7 @@ camera.position.set(0, 1.7, 5);
 
 const renderer =
     new THREE.WebGLRenderer({
-        antialias:true
+        antialias: true
     });
 
 renderer.setSize(
@@ -109,7 +135,7 @@ const floorGeometry =
 
 const floorMaterial =
     new THREE.MeshStandardMaterial({
-        color:0x555555
+        color: 0x555555
     });
 
 const floor =
@@ -148,7 +174,7 @@ loader.load(
 
     './models/aula_y8.glb',
 
-    function(gltf){
+    function (gltf) {
 
         const model =
             gltf.scene;
@@ -192,16 +218,16 @@ const speed = 0.08;
 // GAMEPAD
 // ======================
 
-function updateGamepad(){
+function updateGamepad() {
 
     const gamepads =
         navigator.getGamepads();
 
-    if(!gamepads) return;
+    if (!gamepads) return;
 
     const gp = gamepads[0];
 
-    if(!gp) return;
+    if (!gp) return;
 
 
     // JOYSTICK IZQUIERDO
@@ -238,7 +264,7 @@ function updateGamepad(){
 // MOVIMIENTO CAMARA
 // ======================
 
-function updateMovement(){
+function updateMovement() {
 
     direction.z =
         Number(moveForward)
@@ -252,7 +278,7 @@ function updateMovement(){
 
 
     // ADELANTE
-    if(moveForward || moveBackward){
+    if (moveForward || moveBackward) {
 
         camera.translateZ(
             -direction.z * speed
@@ -262,7 +288,7 @@ function updateMovement(){
 
 
     // LADOS
-    if(moveLeft || moveRight){
+    if (moveLeft || moveRight) {
 
         camera.translateX(
             direction.x * speed
@@ -284,7 +310,7 @@ const dotGeometry =
 
 const dotMaterial =
     new THREE.MeshBasicMaterial({
-        color:0xffffff
+        color: 0xffffff
     });
 
 const dot =
@@ -301,10 +327,51 @@ scene.add(camera);
 
 
 // ======================
+// ACTUALIZAR CABEZA VR
+// ======================
+
+function updateHeadTracking(){
+
+    const alpha =
+        THREE.MathUtils.degToRad(
+            deviceAlpha
+        );
+
+    const beta =
+        THREE.MathUtils.degToRad(
+            deviceBeta
+        );
+
+    const gamma =
+        THREE.MathUtils.degToRad(
+            deviceGamma
+        );
+
+
+    const euler =
+        new THREE.Euler();
+
+    euler.set(
+        beta,
+        alpha,
+        -gamma,
+        'YXZ'
+    );
+
+    camera.quaternion
+        .setFromEuler(euler);
+
+}
+
+
+
+// ======================
 // ANIMACION
 // ======================
 
-function animate(){
+function animate() {
+
+    updateHeadTracking();
 
     updateGamepad();
 
@@ -347,4 +414,35 @@ window.addEventListener(
         );
 
     }
+);
+
+// ======================
+// ACTIVAR SENSORES
+// ======================
+
+window.addEventListener(
+    'click',
+    async () => {
+
+        // FULLSCREEN
+        document.body
+            .requestFullscreen();
+
+        // IOS
+        if(
+            typeof DeviceOrientationEvent
+            !== 'undefined'
+            &&
+            typeof DeviceOrientationEvent
+                .requestPermission
+            === 'function'
+        ){
+
+            await DeviceOrientationEvent
+                .requestPermission();
+
+        }
+
+    },
+    { once:true }
 );
