@@ -2,11 +2,14 @@
 
 import * as THREE from 'three';
 
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { DeviceOrientationControls }
+from 'three/addons/controls/DeviceOrientationControls.js';
 
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { GLTFLoader }
+from 'three/addons/loaders/GLTFLoader.js';
 
-import { VRButton } from 'three/addons/webxr/VRButton.js';
+import { StereoEffect }
+from 'three/addons/effects/StereoEffect.js';
 
 
 // ESCENA
@@ -23,7 +26,7 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
-camera.position.set(0, 2, 5);
+camera.position.set(0, 1.7, 5);
 
 
 // RENDERER
@@ -42,28 +45,23 @@ renderer.setPixelRatio(
 
 renderer.shadowMap.enabled = true;
 
-renderer.xr.enabled = true;
-
-
-// AGREGAR CANVAS
 document
     .getElementById("container3D")
     .appendChild(renderer.domElement);
 
 
-// BOTON VR
-document.body.appendChild(
-    VRButton.createButton(renderer)
+// EFECTO VR DIVIDIDO
+const effect = new StereoEffect(renderer);
+
+effect.setSize(
+    window.innerWidth,
+    window.innerHeight
 );
 
 
-// CONTROLES
-const controls = new OrbitControls(
-    camera,
-    renderer.domElement
-);
-
-controls.enableDamping = true;
+// CONTROLES DE CABEZA
+const controls =
+    new DeviceOrientationControls(camera);
 
 
 // LUCES
@@ -142,24 +140,50 @@ loader.load(
 
         console.log("Modelo cargado");
 
-    },
-
-    function (xhr) {
-
-        console.log(
-            (xhr.loaded / xhr.total * 100)
-            + '% cargado'
-        );
-
-    },
-
-    function (error) {
-
-        console.error(error);
-
     }
 
 );
+
+
+// ======================
+// TELEPORT VR
+// ======================
+
+const raycaster = new THREE.Raycaster();
+
+const center = new THREE.Vector2(0, 0);
+
+let teleportPoint = null;
+
+let gazeStart = null;
+
+const gazeTime = 2000;
+
+
+// PUNTO CENTRAL
+const reticleGeometry =
+    new THREE.RingGeometry(
+        0.01,
+        0.02,
+        32
+    );
+
+const reticleMaterial =
+    new THREE.MeshBasicMaterial({
+        color: 0xffffff
+    });
+
+const reticle =
+    new THREE.Mesh(
+        reticleGeometry,
+        reticleMaterial
+    );
+
+reticle.position.z = -2;
+
+camera.add(reticle);
+
+scene.add(camera);
 
 
 // ANIMACION
@@ -167,7 +191,61 @@ function animate() {
 
     controls.update();
 
-    renderer.render(scene, camera);
+
+    // RAYCAST
+    raycaster.setFromCamera(
+        center,
+        camera
+    );
+
+    const intersects =
+        raycaster.intersectObject(floor);
+
+
+    // SI ESTA MIRANDO EL PISO
+    if (intersects.length > 0) {
+
+        teleportPoint =
+            intersects[0].point;
+
+
+        // EMPEZAR CONTADOR
+        if (!gazeStart) {
+
+            gazeStart = Date.now();
+
+        }
+
+
+        // TELEPORT
+        if (
+            Date.now() - gazeStart
+            > gazeTime
+        ) {
+
+            camera.position.set(
+                teleportPoint.x,
+                1.7,
+                teleportPoint.z
+            );
+
+            gazeStart = null;
+
+        }
+
+    }
+    else {
+
+        gazeStart = null;
+
+    }
+
+
+    // RENDER VR
+    effect.render(
+        scene,
+        camera
+    );
 
 }
 
@@ -180,7 +258,8 @@ renderer.setAnimationLoop(animate);
 window.addEventListener('resize', () => {
 
     camera.aspect =
-        window.innerWidth / window.innerHeight;
+        window.innerWidth /
+        window.innerHeight;
 
     camera.updateProjectionMatrix();
 
@@ -189,4 +268,39 @@ window.addEventListener('resize', () => {
         window.innerHeight
     );
 
+    effect.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
 });
+
+
+
+// ACTIVAR SENSORES IOS
+window.addEventListener(
+    'click',
+    () => {
+
+        if (
+            typeof DeviceOrientationEvent !==
+            'undefined'
+            &&
+            typeof DeviceOrientationEvent
+                .requestPermission ===
+            'function'
+        ) {
+
+            DeviceOrientationEvent
+                .requestPermission()
+                .then(response => {
+
+                    console.log(response);
+
+                });
+
+        }
+
+    },
+    { once: true }
+);
