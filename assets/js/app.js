@@ -19,13 +19,14 @@ scene.background = new THREE.Color(0x202020);
 
 // CAMARA
 const camera = new THREE.PerspectiveCamera(
-    75,
+    60,
     window.innerWidth / window.innerHeight,
     0.1,
     1000
 );
 
-camera.position.set(0, 1.7, 5);
+//camera.position.set(0, 1.7, 5);
+camera.position.set(0, 2, 10);
 
 // ROTACION TELEFONO
 
@@ -136,7 +137,7 @@ const loader = new GLTFLoader();
 
 loader.load(
 
-    './models/aula y8.glb',
+    './models/aula_y8.glb',
 
     function (gltf) {
 
@@ -205,24 +206,53 @@ reticle.position.z = -2;
 camera.add(reticle);
 
 scene.add(camera);
+// PUNTO PARA SABER A DONDE MIRAS
+
+const pointerGeometry =
+    new THREE.SphereGeometry(0.03);
+
+const pointerMaterial =
+    new THREE.MeshBasicMaterial({
+        color: 0xff0000
+    });
+
+const pointer =
+    new THREE.Mesh(
+        pointerGeometry,
+        pointerMaterial
+    );
+
+pointer.position.z = -2;
+
+camera.add(pointer);
 
 
 
 function updateCameraRotation() {
 
-    // ROTACION Y
-    camera.rotation.y =
-        THREE.MathUtils.degToRad(
-            -deviceAlpha
-        );
+    const alpha =
+        THREE.MathUtils.degToRad(deviceAlpha);
 
-    // ROTACION X
-    camera.rotation.x =
-        THREE.MathUtils.degToRad(
-            deviceBeta - 90
-        );
+    const beta =
+        THREE.MathUtils.degToRad(deviceBeta);
+
+    const gamma =
+        THREE.MathUtils.degToRad(deviceGamma);
+
+
+    const euler = new THREE.Euler();
+
+    euler.set(
+        beta,
+        alpha,
+        -gamma,
+        'YXZ'
+    );
+
+    camera.quaternion.setFromEuler(euler);
 
 }
+
 
 // ANIMACION
 function animate() {
