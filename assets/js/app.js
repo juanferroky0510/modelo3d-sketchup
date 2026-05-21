@@ -1,8 +1,4 @@
-// assets/js/app.js
-
 import * as THREE from 'three';
-
-
 
 import { GLTFLoader }
 from 'three/addons/loaders/GLTFLoader.js';
@@ -11,52 +7,40 @@ import { StereoEffect }
 from 'three/addons/effects/StereoEffect.js';
 
 
+// ======================
 // ESCENA
+// ======================
+
 const scene = new THREE.Scene();
 
-scene.background = new THREE.Color(0x202020);
+scene.background =
+    new THREE.Color(0x202020);
 
 
+// ======================
 // CAMARA
-const camera = new THREE.PerspectiveCamera(
-    60,
-    window.innerWidth / window.innerHeight,
-    0.1,
-    1000
-);
+// ======================
 
-//camera.position.set(0, 1.7, 5);
-camera.position.set(0, 2, 10);
+const camera =
+    new THREE.PerspectiveCamera(
+        75,
+        window.innerWidth /
+        window.innerHeight,
+        0.1,
+        1000
+    );
 
-// ROTACION TELEFONO
-
-let deviceAlpha = 0;
-let deviceBeta = 0;
-let deviceGamma = 0;
+camera.position.set(0, 1.7, 5);
 
 
-// LEER SENSORES
-window.addEventListener(
-    'deviceorientation',
-    (event) => {
-
-        deviceAlpha =
-            event.alpha || 0;
-
-        deviceBeta =
-            event.beta || 0;
-
-        deviceGamma =
-            event.gamma || 0;
-
-    }
-);
-
-
+// ======================
 // RENDERER
-const renderer = new THREE.WebGLRenderer({
-    antialias: true
-});
+// ======================
+
+const renderer =
+    new THREE.WebGLRenderer({
+        antialias:true
+    });
 
 renderer.setSize(
     window.innerWidth,
@@ -67,15 +51,17 @@ renderer.setPixelRatio(
     window.devicePixelRatio
 );
 
-renderer.shadowMap.enabled = true;
-
 document
-    .getElementById("container3D")
+    .getElementById('container3D')
     .appendChild(renderer.domElement);
 
 
-// EFECTO VR DIVIDIDO
-const effect = new StereoEffect(renderer);
+// ======================
+// VR DIVIDIDO
+// ======================
+
+const effect =
+    new StereoEffect(renderer);
 
 effect.setSize(
     window.innerWidth,
@@ -83,33 +69,47 @@ effect.setSize(
 );
 
 
-
-
-
+// ======================
 // LUCES
+// ======================
+
 const ambientLight =
-    new THREE.AmbientLight(0xffffff, 1.5);
+    new THREE.AmbientLight(
+        0xffffff,
+        1.5
+    );
 
 scene.add(ambientLight);
 
 
 const directionalLight =
-    new THREE.DirectionalLight(0xffffff, 2);
+    new THREE.DirectionalLight(
+        0xffffff,
+        2
+    );
 
-directionalLight.position.set(5, 10, 7);
-
-directionalLight.castShadow = true;
+directionalLight.position.set(
+    5,
+    10,
+    7
+);
 
 scene.add(directionalLight);
 
 
+// ======================
 // PISO
+// ======================
+
 const floorGeometry =
-    new THREE.PlaneGeometry(50, 50);
+    new THREE.PlaneGeometry(
+        50,
+        50
+    );
 
 const floorMaterial =
     new THREE.MeshStandardMaterial({
-        color: 0x555555
+        color:0x555555
     });
 
 const floor =
@@ -118,49 +118,52 @@ const floor =
         floorMaterial
     );
 
-floor.rotation.x = -Math.PI / 2;
-
-floor.receiveShadow = true;
+floor.rotation.x =
+    -Math.PI / 2;
 
 scene.add(floor);
 
 
+// ======================
 // GRID
+// ======================
+
 const grid =
-    new THREE.GridHelper(50, 50);
+    new THREE.GridHelper(
+        50,
+        50
+    );
 
 scene.add(grid);
 
 
-// CARGAR MODELO
-const loader = new GLTFLoader();
+// ======================
+// MODELO
+// ======================
+
+const loader =
+    new GLTFLoader();
 
 loader.load(
 
     './models/aula_y8.glb',
 
-    function (gltf) {
+    function(gltf){
 
-        const model = gltf.scene;
+        const model =
+            gltf.scene;
 
-        model.scale.set(1, 1, 1);
-
-        model.position.set(0, 0, 0);
-
-        model.traverse((node) => {
-
-            if (node.isMesh) {
-
-                node.castShadow = true;
-                node.receiveShadow = true;
-
-            }
-
-        });
+        model.scale.set(
+            1,
+            1,
+            1
+        );
 
         scene.add(model);
 
-        console.log("Modelo cargado");
+        console.log(
+            'Modelo cargado'
+        );
 
     }
 
@@ -168,148 +171,145 @@ loader.load(
 
 
 // ======================
-// TELEPORT VR
+// MOVIMIENTO
 // ======================
 
-const raycaster = new THREE.Raycaster();
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
 
-const center = new THREE.Vector2(0, 0);
+const velocity =
+    new THREE.Vector3();
 
-let teleportPoint = null;
+const direction =
+    new THREE.Vector3();
 
-let gazeStart = null;
-
-const gazeTime = 2000;
-
-
-// PUNTO CENTRAL
-const reticleGeometry =
-    new THREE.RingGeometry(
-        0.01,
-        0.02,
-        32
-    );
-
-const reticleMaterial =
-    new THREE.MeshBasicMaterial({
-        color: 0xffffff
-    });
-
-const reticle =
-    new THREE.Mesh(
-        reticleGeometry,
-        reticleMaterial
-    );
-
-reticle.position.z = -2;
-
-camera.add(reticle);
-
-scene.add(camera);
-// PUNTO PARA SABER A DONDE MIRAS
-
-const pointerGeometry =
-    new THREE.SphereGeometry(0.03);
-
-const pointerMaterial =
-    new THREE.MeshBasicMaterial({
-        color: 0xff0000
-    });
-
-const pointer =
-    new THREE.Mesh(
-        pointerGeometry,
-        pointerMaterial
-    );
-
-pointer.position.z = -2;
-
-camera.add(pointer);
+const speed = 0.08;
 
 
+// ======================
+// GAMEPAD
+// ======================
 
-function updateCameraRotation() {
+function updateGamepad(){
 
-    const alpha =
-        THREE.MathUtils.degToRad(deviceAlpha);
+    const gamepads =
+        navigator.getGamepads();
 
-    const beta =
-        THREE.MathUtils.degToRad(deviceBeta);
+    if(!gamepads) return;
 
-    const gamma =
-        THREE.MathUtils.degToRad(deviceGamma);
+    const gp = gamepads[0];
+
+    if(!gp) return;
 
 
-    const euler = new THREE.Euler();
+    // JOYSTICK IZQUIERDO
+    const lx = gp.axes[0];
+    const ly = gp.axes[1];
 
-    euler.set(
-        beta,
-        alpha,
-        -gamma,
-        'YXZ'
-    );
+    moveForward =
+        ly < -0.2;
 
-    camera.quaternion.setFromEuler(euler);
+    moveBackward =
+        ly > 0.2;
+
+    moveLeft =
+        lx < -0.2;
+
+    moveRight =
+        lx > 0.2;
+
+
+    // JOYSTICK DERECHO
+    const rx = gp.axes[2];
+    const ry = gp.axes[3];
+
+    camera.rotation.y -=
+        rx * 0.04;
+
+    camera.rotation.x -=
+        ry * 0.04;
 
 }
 
 
-// ANIMACION
-function animate() {
+// ======================
+// MOVIMIENTO CAMARA
+// ======================
 
-    
+function updateMovement(){
 
-    updateCameraRotation();
-    // RAYCAST
-    raycaster.setFromCamera(
-        center,
-        camera
+    direction.z =
+        Number(moveForward)
+        - Number(moveBackward);
+
+    direction.x =
+        Number(moveRight)
+        - Number(moveLeft);
+
+    direction.normalize();
+
+
+    // ADELANTE
+    if(moveForward || moveBackward){
+
+        camera.translateZ(
+            -direction.z * speed
+        );
+
+    }
+
+
+    // LADOS
+    if(moveLeft || moveRight){
+
+        camera.translateX(
+            direction.x * speed
+        );
+
+    }
+
+}
+
+
+// ======================
+// PUNTO CENTRAL
+// ======================
+
+const dotGeometry =
+    new THREE.SphereGeometry(
+        0.01
     );
 
-    const intersects =
-        raycaster.intersectObject(floor);
+const dotMaterial =
+    new THREE.MeshBasicMaterial({
+        color:0xffffff
+    });
+
+const dot =
+    new THREE.Mesh(
+        dotGeometry,
+        dotMaterial
+    );
+
+dot.position.z = -2;
+
+camera.add(dot);
+
+scene.add(camera);
 
 
-    // SI ESTA MIRANDO EL PISO
-    if (intersects.length > 0) {
+// ======================
+// ANIMACION
+// ======================
 
-        teleportPoint =
-            intersects[0].point;
+function animate(){
 
+    updateGamepad();
 
-        // EMPEZAR CONTADOR
-        if (!gazeStart) {
+    updateMovement();
 
-            gazeStart = Date.now();
-
-        }
-
-
-        // TELEPORT
-        if (
-            Date.now() - gazeStart
-            > gazeTime
-        ) {
-
-            camera.position.set(
-                teleportPoint.x,
-                1.7,
-                teleportPoint.z
-            );
-
-            gazeStart = null;
-
-        }
-
-    }
-    else {
-
-        gazeStart = null;
-
-    }
-
-
-    // RENDER VR
     effect.render(
         scene,
         camera
@@ -317,58 +317,34 @@ function animate() {
 
 }
 
+renderer.setAnimationLoop(
+    animate
+);
 
-// LOOP
-renderer.setAnimationLoop(animate);
 
-
+// ======================
 // RESPONSIVE
-window.addEventListener('resize', () => {
+// ======================
 
-    camera.aspect =
-        window.innerWidth /
-        window.innerHeight;
-
-    camera.updateProjectionMatrix();
-
-    renderer.setSize(
-        window.innerWidth,
-        window.innerHeight
-    );
-
-    effect.setSize(
-        window.innerWidth,
-        window.innerHeight
-    );
-
-});
-
-
-
-// ACTIVAR SENSORES IOS
 window.addEventListener(
-    'click',
+    'resize',
     () => {
 
-        if (
-            typeof DeviceOrientationEvent !==
-            'undefined'
-            &&
-            typeof DeviceOrientationEvent
-                .requestPermission ===
-            'function'
-        ) {
+        camera.aspect =
+            window.innerWidth /
+            window.innerHeight;
 
-            DeviceOrientationEvent
-                .requestPermission()
-                .then(response => {
+        camera.updateProjectionMatrix();
 
-                    console.log(response);
+        renderer.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
 
-                });
+        effect.setSize(
+            window.innerWidth,
+            window.innerHeight
+        );
 
-        }
-
-    },
-    { once: true }
+    }
 );
