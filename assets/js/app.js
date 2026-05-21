@@ -2,8 +2,7 @@
 
 import * as THREE from 'three';
 
-import { DeviceOrientationControls }
-from 'three/addons/controls/DeviceOrientationControls.js';
+
 
 import { GLTFLoader }
 from 'three/addons/loaders/GLTFLoader.js';
@@ -27,6 +26,30 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 camera.position.set(0, 1.7, 5);
+
+// ROTACION TELEFONO
+
+let deviceAlpha = 0;
+let deviceBeta = 0;
+let deviceGamma = 0;
+
+
+// LEER SENSORES
+window.addEventListener(
+    'deviceorientation',
+    (event) => {
+
+        deviceAlpha =
+            event.alpha || 0;
+
+        deviceBeta =
+            event.beta || 0;
+
+        deviceGamma =
+            event.gamma || 0;
+
+    }
+);
 
 
 // RENDERER
@@ -59,9 +82,7 @@ effect.setSize(
 );
 
 
-// CONTROLES DE CABEZA
-const controls =
-    new DeviceOrientationControls(camera);
+
 
 
 // LUCES
@@ -186,12 +207,29 @@ camera.add(reticle);
 scene.add(camera);
 
 
+
+function updateCameraRotation() {
+
+    // ROTACION Y
+    camera.rotation.y =
+        THREE.MathUtils.degToRad(
+            -deviceAlpha
+        );
+
+    // ROTACION X
+    camera.rotation.x =
+        THREE.MathUtils.degToRad(
+            deviceBeta - 90
+        );
+
+}
+
 // ANIMACION
 function animate() {
 
-    controls.update();
+    
 
-
+    updateCameraRotation();
     // RAYCAST
     raycaster.setFromCamera(
         center,
