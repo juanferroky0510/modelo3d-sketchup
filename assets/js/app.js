@@ -374,21 +374,34 @@ function updateHeadTracking() {
         );
 
 
+    // ORIENTACION TELEFONO
     const euler =
-        new THREE.Euler();
-
-    euler.set(
-        beta,
-        alpha,
-        -gamma,
-        'YXZ'
-    );
+        new THREE.Euler(
+            beta,
+            alpha,
+            -gamma,
+            'YXZ'
+        );
 
     camera.quaternion
         .setFromEuler(euler);
 
-}
 
+    // CORRECCION HORIZONTAL VR
+    const correctionQuaternion =
+        new THREE.Quaternion();
+
+    correctionQuaternion
+        .setFromAxisAngle(
+            new THREE.Vector3(0,0,1),
+            -Math.PI / 2
+        );
+
+    camera.quaternion.multiply(
+        correctionQuaternion
+    );
+
+}
 
 
 // ======================
