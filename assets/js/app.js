@@ -394,7 +394,7 @@ function updateHeadTracking() {
     correctionQuaternion
         .setFromAxisAngle(
             new THREE.Vector3(0,0,1),
-            -Math.PI / 2
+            Math.PI / 2
         );
 
     camera.quaternion.multiply(
