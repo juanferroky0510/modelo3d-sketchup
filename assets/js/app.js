@@ -375,13 +375,20 @@ function updateHeadTracking() {
 
 
     // ORIENTACION TELEFONO
-    const euler =
+   /*  const euler =
         new THREE.Euler(
             beta,
             alpha,
             -gamma,
             'YXZ'
-        );
+        ); */
+    const euler =
+    new THREE.Euler(
+        -beta,
+        alpha,
+        0,
+        'YXZ'
+    );
 
     camera.quaternion
         .setFromEuler(euler);
@@ -403,6 +410,7 @@ function updateHeadTracking() {
     camera.quaternion.multiply(
         correctionQuaternion
     );
+    camera.rotation.z = 0;
 
 }
 
