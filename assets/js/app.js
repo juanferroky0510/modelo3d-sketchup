@@ -391,10 +391,13 @@ function updateHeadTracking() {
     const correctionQuaternion =
         new THREE.Quaternion();
 
+    const correctionAngle =
+        THREE.MathUtils.degToRad(-45);
+
     correctionQuaternion
         .setFromAxisAngle(
-            new THREE.Vector3(0,0,1),
-            Math.PI / 2
+            new THREE.Vector3(0, 0, 1),
+            correctionAngle
         );
 
     camera.quaternion.multiply(
