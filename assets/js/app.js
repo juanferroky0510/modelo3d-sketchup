@@ -384,32 +384,31 @@ camera.add(dot);
 function updateHeadTracking() {
 
     // ======================
-    // YAW
-    // izquierda / derecha
+    // IZQUIERDA / DERECHA
     // ======================
 
     cameraHolder.rotation.y =
         THREE.MathUtils.degToRad(
-            -deviceAlpha
+            deviceGamma * 2
         );
 
 
     // ======================
-    // PITCH
-    // arriba / abajo
+    // ARRIBA / ABAJO
     // ======================
 
     cameraPitch.rotation.x =
         THREE.MathUtils.degToRad(
             deviceBeta - 90
-        ) * -1;
+        );
+
 
     // LIMITAR ANGULO
     cameraPitch.rotation.x =
         THREE.MathUtils.clamp(
             cameraPitch.rotation.x,
-            -Math.PI / 2,
-            Math.PI / 2
+            -1.2,
+            1.2
         );
 
 }
