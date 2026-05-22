@@ -6,6 +6,7 @@ import { GLTFLoader }
 import { StereoEffect }
     from 'three/addons/effects/StereoEffect.js';
 
+
 // ======================
 // FORZAR LANDSCAPE
 // ======================
@@ -45,6 +46,22 @@ window.screen.orientation.lock(
 
 const scene = new THREE.Scene();
 
+const player =
+    new THREE.Object3D();
+
+const cameraHolder =
+    new THREE.Object3D();
+
+const cameraPitch =
+    new THREE.Object3D();
+
+scene.add(player);
+
+player.add(cameraHolder);
+
+cameraHolder.add(cameraPitch);
+
+
 scene.background =
     new THREE.Color(0x202020);
 
@@ -62,7 +79,15 @@ const camera =
         1000
     );
 
-camera.position.set(0, 1.7, 5);
+camera.position.set(0, 0, 0);
+
+player.position.set(
+    0,
+    1.7,
+    5
+);
+
+cameraPitch.add(camera);
 
 // ======================
 // ROTACION TELEFONO
@@ -306,7 +331,7 @@ function updateMovement() {
     // ADELANTE
     if (moveForward || moveBackward) {
 
-        camera.translateZ(
+        player.translateZ(
             -direction.z * speed
         );
 
@@ -316,7 +341,7 @@ function updateMovement() {
     // LADOS
     if (moveLeft || moveRight) {
 
-        camera.translateX(
+        player.translateX(
             direction.x * speed
         );
 
@@ -349,7 +374,7 @@ dot.position.z = -2;
 
 camera.add(dot);
 
-scene.add(camera);
+
 
 
 // ======================
@@ -358,59 +383,34 @@ scene.add(camera);
 
 function updateHeadTracking() {
 
-    const alpha =
+    // ======================
+    // YAW
+    // izquierda / derecha
+    // ======================
+
+    cameraHolder.rotation.y =
         THREE.MathUtils.degToRad(
-            deviceAlpha
+            -deviceAlpha
         );
 
-    const beta =
+
+    // ======================
+    // PITCH
+    // arriba / abajo
+    // ======================
+
+    cameraPitch.rotation.x =
         THREE.MathUtils.degToRad(
-            deviceBeta
+            deviceBeta - 90
+        ) * -1;
+
+    // LIMITAR ANGULO
+    cameraPitch.rotation.x =
+        THREE.MathUtils.clamp(
+            cameraPitch.rotation.x,
+            -Math.PI / 2,
+            Math.PI / 2
         );
-
-    const gamma =
-        THREE.MathUtils.degToRad(
-            deviceGamma
-        );
-
-
-    // ORIENTACION TELEFONO
-   /*  const euler =
-        new THREE.Euler(
-            beta,
-            alpha,
-            -gamma,
-            'YXZ'
-        ); */
-    const euler =
-    new THREE.Euler(
-        -beta,
-        alpha,
-        0,
-        'YXZ'
-    );
-
-    camera.quaternion
-        .setFromEuler(euler);
-
-
-    // CORRECCION HORIZONTAL VR
-    const correctionQuaternion =
-        new THREE.Quaternion();
-
-    const correctionAngle =
-        THREE.MathUtils.degToRad(-45);
-
-    correctionQuaternion
-        .setFromAxisAngle(
-            new THREE.Vector3(0, 0, 1),
-            correctionAngle
-        );
-
-    camera.quaternion.multiply(
-        correctionQuaternion
-    );
-    camera.rotation.z = 0;
 
 }
 
