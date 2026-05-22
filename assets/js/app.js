@@ -389,7 +389,7 @@ function updateHeadTracking() {
 
     cameraHolder.rotation.y =
         THREE.MathUtils.degToRad(
-            deviceGamma * 2
+            -deviceGamma * 2
         );
 
 
@@ -399,7 +399,7 @@ function updateHeadTracking() {
 
     cameraPitch.rotation.x =
         THREE.MathUtils.degToRad(
-            deviceBeta - 90
+            -(deviceBeta - 90)
         );
 
 
