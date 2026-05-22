@@ -34,7 +34,7 @@ const camera = new THREE.PerspectiveCamera(
 
 const player = new THREE.Group();
 
-player.position.set(0, 1.2, 5);
+player.position.set(0, 0.7, 5);
 
 scene.add(player);
 
