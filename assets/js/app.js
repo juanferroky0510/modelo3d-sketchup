@@ -6,6 +6,38 @@ import { GLTFLoader }
 import { StereoEffect }
     from 'three/addons/effects/StereoEffect.js';
 
+// ======================
+// FORZAR LANDSCAPE
+// ======================
+
+async function forceLandscape() {
+
+    try {
+
+        if (screen.orientation) {
+
+            await screen.orientation.lock(
+                'landscape'
+            );
+
+        }
+
+    }
+    catch (error) {
+
+        console.log(
+            'Landscape no soportado'
+        );
+
+    }
+
+}
+
+forceLandscape();
+window.screen.orientation.lock(
+    'landscape-primary'
+);
+
 
 // ======================
 // ESCENA
@@ -23,7 +55,7 @@ scene.background =
 
 const camera =
     new THREE.PerspectiveCamera(
-        75,
+        60,
         window.innerWidth /
         window.innerHeight,
         0.1,
@@ -70,12 +102,14 @@ const renderer =
 
 renderer.setSize(
     window.innerWidth,
-    window.innerHeight
+    window.innerHeight,
+    false
 );
 
 renderer.setPixelRatio(
     window.devicePixelRatio
 );
+renderer.xr.enabled = false;
 
 document
     .getElementById('container3D')
@@ -247,15 +281,7 @@ function updateGamepad() {
         lx > 0.2;
 
 
-    // JOYSTICK DERECHO
-    const rx = gp.axes[2];
-    const ry = gp.axes[3];
 
-    camera.rotation.y -=
-        rx * 0.04;
-
-    camera.rotation.x -=
-        ry * 0.04;
 
 }
 
@@ -330,7 +356,7 @@ scene.add(camera);
 // ACTUALIZAR CABEZA VR
 // ======================
 
-function updateHeadTracking(){
+function updateHeadTracking() {
 
     const alpha =
         THREE.MathUtils.degToRad(
@@ -396,7 +422,7 @@ renderer.setAnimationLoop(
 window.addEventListener(
     'resize',
     () => {
-
+        window.scrollTo(0, 0);
         camera.aspect =
             window.innerWidth /
             window.innerHeight;
@@ -405,7 +431,8 @@ window.addEventListener(
 
         renderer.setSize(
             window.innerWidth,
-            window.innerHeight
+            window.innerHeight,
+            false
         );
 
         effect.setSize(
@@ -429,14 +456,14 @@ window.addEventListener(
             .requestFullscreen();
 
         // IOS
-        if(
+        if (
             typeof DeviceOrientationEvent
             !== 'undefined'
             &&
             typeof DeviceOrientationEvent
                 .requestPermission
             === 'function'
-        ){
+        ) {
 
             await DeviceOrientationEvent
                 .requestPermission();
@@ -444,5 +471,5 @@ window.addEventListener(
         }
 
     },
-    { once:true }
+    { once: true }
 );
