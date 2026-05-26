@@ -34,7 +34,7 @@ const camera = new THREE.PerspectiveCamera(
 
 const player = new THREE.Group();
 
-player.position.set(0, 1.4, 0);
+player.position.set(0, 0.6, 0);
 
 scene.add(player);
 
@@ -289,45 +289,3 @@ window.addEventListener('resize', () => {
     );
 
 });
-
-// ======================
-// BOTON ENTRAR VR
-// ======================
-
-const enterVRButton =
-    document.getElementById(
-        'enterVR'
-    );
-
-enterVRButton.addEventListener(
-    'click',
-    async () => {
-
-        // FULLSCREEN
-        await document.body
-            .requestFullscreen();
-
-        // IOS
-        if(
-            typeof DeviceOrientationEvent
-            !== 'undefined'
-            &&
-            typeof DeviceOrientationEvent
-                .requestPermission
-            === 'function'
-        ){
-
-            await DeviceOrientationEvent
-                .requestPermission();
-
-        }
-
-        // OCULTAR UI
-        document
-            .getElementById(
-                'overlayUI'
-            )
-            .style.display = 'none';
-
-    }
-);
